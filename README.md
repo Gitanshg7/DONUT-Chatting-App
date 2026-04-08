@@ -271,4 +271,4 @@ npm run dev
 
 ## 📄 License
 
-This project is for educational purposes.
+This project was built for learning and demonstration purposes.
