@@ -4,6 +4,12 @@ A full-stack real-time one-to-one chat application built with **Spring Boot** an
 
 ---
 
+## 🎯 Why This Project
+
+Built to understand real-world concepts like stateless authentication, real-time communication, and full-stack integration using modern technologies.
+
+---
+
 ## 📸 Screenshots
 
 ### Login Page
@@ -39,6 +45,17 @@ A full-stack real-time one-to-one chat application built with **Spring Boot** an
 
 ---
 
+## 🧠 Architecture Flow
+
+1. User logs in → receives JWT token
+2. Token stored in frontend (localStorage)
+3. All API requests include JWT in Authorization header
+4. WebSocket connection established with JWT authentication
+5. Messages sent via REST → broadcast via WebSocket
+6. Clients subscribe to `/topic/messages/{username}` for real-time updates
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Backend
@@ -66,7 +83,7 @@ A full-stack real-time one-to-one chat application built with **Spring Boot** an
 ## 📁 Project Structure
 
 ```
-DONUT---Chatting-App/
+donut-chat-app/
 ├── backend/
 │   ├── pom.xml
 │   └── src/main/
@@ -142,8 +159,8 @@ DONUT---Chatting-App/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Gitanshg7/DONUT---Chatting-App.git
-cd DONUT---Chatting-App
+git clone https://github.com/Gitanshg7/DONUT-Chatting-App.git
+cd DONUT-Chatting-App
 ```
 
 ### 2. Database Setup
