@@ -30,15 +30,25 @@ public class MessageController {
         String sender = authentication.getName();
         String receiver = request.get("receiverUsername");
         String content = request.get("content");
+        String type = request.getOrDefault("type", "TEXT");
+        String fileUrl = request.get("fileUrl");
 
         if (receiver == null || receiver.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Receiver username must not be empty");
         }
-        if (content == null || content.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message content must not be empty");
+
+        // TEXT messages require content; file-based messages require fileUrl
+        if ("TEXT".equals(type)) {
+            if (content == null || content.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message content must not be empty");
+            }
+        } else {
+            if (fileUrl == null || fileUrl.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File URL must not be empty for " + type + " messages");
+            }
         }
 
-        Message message = messageService.saveMessage(sender, receiver, content);
+        Message message = messageService.saveMessage(sender, receiver, content, type, fileUrl);
         webSocketController.broadcastMessage(message);
 
         return ResponseEntity.ok(message);

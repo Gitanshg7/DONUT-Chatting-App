@@ -80,7 +80,53 @@ function ChatBox({ messages, currentUser }) {
                 {!isMine && (
                   <p className="text-xs font-semibold text-primary-400 mb-1">{msg.sender}</p>
                 )}
-                <p className="text-sm leading-relaxed break-words">{msg.content}</p>
+
+                {/* Message Content by Type */}
+                {(!msg.type || msg.type === 'TEXT') && (
+                  <p className="text-sm leading-relaxed break-words">{msg.content}</p>
+                )}
+
+                {msg.type === 'IMAGE' && (
+                  <div className="mt-1 mb-1">
+                    <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={msg.fileUrl}
+                        alt="Shared image"
+                        className="max-w-full rounded-lg max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        loading="lazy"
+                      />
+                    </a>
+                  </div>
+                )}
+
+                {msg.type === 'FILE' && (
+                  <a
+                    href={msg.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center gap-2 mt-1 mb-1 px-3 py-2 rounded-lg transition-colors ${
+                      isMine
+                        ? 'bg-white/10 hover:bg-white/20 text-white'
+                        : 'bg-dark-700/50 hover:bg-dark-700/80 text-dark-200'
+                    }`}
+                  >
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-sm truncate">{msg.content || 'Download File'}</span>
+                  </a>
+                )}
+
+                {msg.type === 'AUDIO' && (
+                  <div className="mt-1 mb-1">
+                    <audio controls preload="metadata" className="max-w-full h-10" style={{ minWidth: '220px' }}>
+                      <source src={msg.fileUrl} type="audio/webm" />
+                      <source src={msg.fileUrl} type="audio/mp3" />
+                      Your browser does not support audio playback.
+                    </audio>
+                  </div>
+                )}
+
                 <p className={`text-[10px] mt-1 text-right ${
                   isMine ? 'text-primary-200/70' : 'text-dark-500'
                 }`}>

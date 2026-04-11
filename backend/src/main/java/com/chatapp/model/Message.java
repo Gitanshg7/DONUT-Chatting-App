@@ -23,8 +23,13 @@ public class Message {
     @Column(nullable = false)
     private String receiver;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Column(nullable = false)
+    private String type = "TEXT";
+
+    private String fileUrl;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
@@ -36,6 +41,15 @@ public class Message {
         this.sender = sender;
         this.receiver = receiver;
         this.content = content;
+        this.timestamp = timestamp;
+    }
+
+    public Message(String sender, String receiver, String content, String type, String fileUrl, LocalDateTime timestamp) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.content = content;
+        this.type = type;
+        this.fileUrl = fileUrl;
         this.timestamp = timestamp;
     }
 
@@ -77,5 +91,21 @@ public class Message {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 }

@@ -21,6 +21,11 @@ public class MessageService {
         return messageRepository.save(message);
     }
 
+    public Message saveMessage(String sender, String receiver, String content, String type, String fileUrl) {
+        Message message = new Message(sender, receiver, content, type, fileUrl, LocalDateTime.now());
+        return messageRepository.save(message);
+    }
+
     public List<Message> getChatHistory(String currentUser, String otherUser) {
         return messageRepository.findTop20BySenderAndReceiverOrSenderAndReceiverOrderByTimestampDesc(
                 currentUser, otherUser,
