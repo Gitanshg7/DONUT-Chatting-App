@@ -1,6 +1,6 @@
 # 🍩 DONUT — Real-Time Chat Application
 
-A full-stack real-time one-to-one chat application built with **Spring Boot** and **React**. Features JWT authentication, WebSocket messaging via STOMP/SockJS, and online user tracking — all wrapped in a sleek dark-themed UI.
+A full-stack real-time one-to-one chat application built with **Spring Boot** and **React**. Features JWT authentication, WebSocket messaging via STOMP/SockJS, online user tracking, **image & file sharing**, and **voice message recording** — all wrapped in a sleek dark-themed UI.
 
 ---
 
@@ -41,6 +41,9 @@ Built to understand real-world concepts like stateless authentication, real-time
 - 🟢 **Online Status Tracking** — See who's online in real-time
 - 🔒 **Encrypted Passwords** — BCrypt hashing for all stored passwords
 - 📜 **Chat History** — Loads last 20 messages per conversation
+- 🖼️ **Image Sharing** — Upload and view images directly in chat (JPG, PNG)
+- 📎 **File Sharing** — Send and download documents (PDF) within conversations
+- 🎤 **Voice Messages** — Record and send audio clips using the browser microphone
 - 🌙 **Modern Dark UI** — Glassmorphism design with smooth animations
 
 ---
@@ -53,6 +56,28 @@ Built to understand real-world concepts like stateless authentication, real-time
 4. WebSocket connection established with JWT authentication
 5. Messages sent via REST → broadcast via WebSocket
 6. Clients subscribe to `/topic/messages/{username}` for real-time updates
+
+### 📤 File / Image / Voice Upload Flow
+
+```
+User clicks 📎 (attach) or 🎤 (record)
+    ↓
+Frontend uploads file → POST /upload (multipart)
+    ↓
+FileController validates extension & saves to uploads/
+    ↓
+Returns { fileUrl: "http://localhost:8080/uploads/..." }
+    ↓
+Frontend sends message → POST /messages/send { type, fileUrl, receiverUsername }
+    ↓
+MessageController saves to DB → broadcasts via WebSocket
+    ↓
+Receiver's ChatBox renders based on message type:
+  TEXT  → <p> text bubble
+  IMAGE → <img> inline preview
+  FILE  → <a> download link with icon
+  AUDIO → <audio> player with controls
+```
 
 ---
 
@@ -91,11 +116,13 @@ donut-chat-app/
 │       │   ├── ChatAppApplication.java
 │       │   ├── config/
 │       │   │   ├── SecurityConfig.java
-│       │   │   └── WebSocketConfig.java
+│       │   │   ├── WebSocketConfig.java
+│       │   │   └── WebMvcConfig.java
 │       │   ├── controller/
 │       │   │   ├── AuthController.java
 │       │   │   ├── UserController.java
-│       │   │   └── MessageController.java
+│       │   │   ├── MessageController.java
+│       │   │   └── FileController.java
 │       │   ├── service/
 │       │   │   ├── AuthService.java
 │       │   │   ├── UserService.java
@@ -140,6 +167,7 @@ donut-chat-app/
 │       └── styles/
 │           └── index.css
 │
+├── uploads/              ← uploaded files (gitignored)
 ├── screenshots/
 ├── .gitignore
 └── README.md
@@ -189,7 +217,7 @@ Run the Spring Boot server:
 mvn spring-boot:run
 ```
 
-> The server starts at `http://localhost:8080`. Hibernate auto-creates the `users` and `messages` tables.
+> The server starts at `http://localhost:8080`. Hibernate auto-creates the `users` and `messages` tables. An `uploads/` directory is auto-created for file storage.
 
 ### 4. Frontend Setup
 
@@ -217,9 +245,29 @@ npm run dev
 | `POST` | `/auth/register` | ❌ Public | Register a new user |
 | `POST` | `/auth/login` | ❌ Public | Login and receive JWT |
 | `GET` | `/users` | ✅ JWT | List all users except current |
-| `POST` | `/messages/send` | ✅ JWT | Send a message |
+| `POST` | `/messages/send` | ✅ JWT | Send a message (text, image, file, or audio) |
 | `GET` | `/messages/{username}` | ✅ JWT | Get chat history (last 20) |
+| `POST` | `/upload` | ✅ JWT | Upload a file (returns `{ fileUrl }`) |
+| `GET` | `/uploads/{filename}` | ❌ Public | Access an uploaded file |
 | `WS` | `/ws` | ✅ JWT (STOMP) | WebSocket endpoint |
+
+### Message Payload (POST `/messages/send`)
+
+```json
+{
+  "receiverUsername": "john",
+  "content": "Hello!",
+  "type": "TEXT",
+  "fileUrl": null
+}
+```
+
+| `type` | Description | Required Field |
+|--------|-------------|----------------|
+| `TEXT` | Plain text message | `content` |
+| `IMAGE` | Uploaded image (JPG, PNG) | `fileUrl` |
+| `FILE` | Uploaded document (PDF) | `fileUrl` |
+| `AUDIO` | Recorded voice message (WebM, MP3, WAV) | `fileUrl` |
 
 ### WebSocket Topics
 
@@ -247,8 +295,18 @@ npm run dev
 | `id` | BIGINT | PK, AUTO_INCREMENT |
 | `sender` | VARCHAR(255) | NOT NULL |
 | `receiver` | VARCHAR(255) | NOT NULL |
-| `content` | TEXT | NOT NULL |
+| `content` | TEXT | Nullable (used for TEXT messages) |
+| `type` | VARCHAR(255) | NOT NULL, default `TEXT` |
+| `file_url` | VARCHAR(255) | Nullable (used for IMAGE/FILE/AUDIO) |
 | `timestamp` | DATETIME(6) | NOT NULL |
+
+### Supported File Types
+
+| Category | Extensions | Max Size |
+|----------|-----------|----------|
+| Images | `.jpg`, `.jpeg`, `.png` | 10 MB |
+| Documents | `.pdf` | 10 MB |
+| Audio | `.webm`, `.mp3`, `.wav` | 10 MB |
 
 ---
 
