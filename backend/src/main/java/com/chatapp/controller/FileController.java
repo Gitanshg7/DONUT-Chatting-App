@@ -48,7 +48,12 @@ public class FileController {
             Path filePath = uploadPath.resolve(filename);
             Files.write(filePath, file.getBytes());
 
-            String fileUrl = "http://localhost:8080/uploads/" + filename;
+            String baseUrl = System.getenv("BASE_URL");
+            if (baseUrl == null || baseUrl.isEmpty()) {
+                baseUrl = "http://localhost:8080";
+            }
+            
+            String fileUrl = baseUrl + "/uploads/" + filename;
             return ResponseEntity.ok(Map.of("fileUrl", fileUrl));
 
         } catch (IOException e) {

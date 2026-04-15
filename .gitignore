@@ -54,8 +54,10 @@ Desktop.ini
 
 # Environment variables
 .env
+backend/.env
 .env.local
 .env.*.local
+*.log
 
 # ========================
 # Sensitive / Secret Files
